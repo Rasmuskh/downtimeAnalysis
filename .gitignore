@@ -1,0 +1,6 @@
+#Ignore plots
+*.jpg
+*.png
+*.pdf
+#Ignore data files
+*.csv
