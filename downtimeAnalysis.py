@@ -42,9 +42,9 @@ def mapDowntime(df, xName, yName, xdim, ydim, durCeiling, machine=None):
     plt.tight_layout()
     plt.show()
 
-# for machine in [None, 'R1', 'R3', 'I']:
-#     mapDowntime(df, 'dayofweek', 'hour', 7, 24, durCeiling=300, machine=machine)
-#     mapDowntime(df, 'dayofweek', 'week', 7, 27, durCeiling=300, machine=machine)
+for machine in [None, 'R1', 'R3', 'I']:
+    mapDowntime(df, 'dayofweek', 'hour', 7, 24, durCeiling=300, machine=machine)
+    mapDowntime(df, 'dayofweek', 'week', 7, 27, durCeiling=300, machine=machine)
 
 #make a similar plot for event codes using groupby
 f, axs = plt.subplots(1,1,figsize=(12,8))
