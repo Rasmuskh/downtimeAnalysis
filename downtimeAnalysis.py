@@ -1,10 +1,10 @@
 # coding: utf-8
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+import seaborn as sns; sns.set()
 import numpy as np
 
-df=pd.read_csv('DowntimeData.csv', usecols=[1, 2, 4, 5, 6], names=['date','time', 'code', 'machine', 'duration'], skiprows=[0])
+df=pd.read_csv('DowntimeApp.csv', usecols=[1, 2, 4, 5, 6], names=['date','time', 'code', 'machine', 'duration'], skiprows=[0])
 #convert date from string to date type
 df['date'] = df['date'].astype('datetime64[ns]')
 #add columns
@@ -40,7 +40,7 @@ def heatmapDowntime(df, xName, yName, xdim, ydim, durCeiling, yticklabels, mode,
     if mode == 'counts':
         sns.heatmap(hmCounts, cmap='viridis', fmt='g', annot=True, linewidths=.5, cbar_kws={'label': 'Number of downtime events'}, yticklabels= yticklabels)
     elif mode == 'summed':
-        sns.heatmap(hmDur, cmap='viridis', fmt='g', annot=True,linewidths=.5, cbar_kws={'label': 'Summed downtime (hours)'}, yticklabels= yticklabels, vmax=durCeiling) 
+        sns.heatmap(hmDur, cmap='viridis', fmt='g', annot=True,linewidths=.5, cbar_kws={'label': 'Summed downtime (hours)'}, yticklabels= yticklabels, vmax=durCeiling)
     plt.ylabel(xName, fontsize=16)
     plt.xlabel(yName, fontsize=16)
     plt.tight_layout()
