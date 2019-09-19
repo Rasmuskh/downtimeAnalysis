@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 import numpy as np
 
-df=pd.read_csv('DowntimeApp.csv', usecols=[1, 2, 4, 5, 6], names=['date','time', 'code', 'machine', 'duration'], skiprows=[0])
+df=pd.read_csv('downtime.csv', usecols=[1, 2, 4, 5, 6], names=['date','time', 'code', 'machine', 'duration'], skiprows=[0])
 #convert date from string to date type
 df['date'] = df['date'].astype('datetime64[ns]')
 #add columns
@@ -23,6 +23,18 @@ df['codeIndex'] = df['code'].map(codeDict).astype(np.int16)
 #Select only first run period
 df = df.query('week<27')
 
+#Schedule
+sch=pd.read_csv('schedule.csv', usecols=[0,1, 2, 3, 4, 5], names=['date','week', 'year', 'r1Plan', 'r3Plan', 'spfPlan'], skiprows=[0])
+sumR1 = sch.sum().r1Plan
+sumR3 = sch.sum().r3Plan
+sumI = sch.sum().spfPlan
+delivDict = {'R1': sumR1, 'R3': sumR3, 'I': sumI}
+for index, row in df.iterrows():
+    df.at[index, 'percOfPlan'] = 100 * row['duration'] / (60*delivDict[row['machine']])
+    df.at[index, 'percOfDown'] = 100 * row['duration'] / df.groupby('machine').sum().duration[row['machine']]
+
+
+
 def heatmapDowntime(df, xName, yName, xdim, ydim, durCeiling, yticklabels, mode, machine=None):
     if not machine:
         machine = 'All machines'
@@ -30,17 +42,25 @@ def heatmapDowntime(df, xName, yName, xdim, ydim, durCeiling, yticklabels, mode,
         df = df.query('machine==\'%s\''%machine)
     hmCounts = np.zeros((xdim, ydim))
     hmDur = np.zeros((xdim, ydim))
+    hmPercOfPlan = np.zeros((xdim, ydim))
+    hmPercOfDown = np.zeros((xdim, ydim))
     for index, row in df.iterrows():
         h = row[xName]
         d = row[yName]
         hmCounts[h][d] += 1
         hmDur[h][d] += row.duration
+        hmPercOfPlan[h][d] += row.percOfPlan
+        hmPercOfDown[h][d] += row.percOfDown
     f, axs = plt.subplots(1,1,figsize=(16,10))
     plt.title('%s\n '%machine, fontsize=20)
     if mode == 'counts':
         sns.heatmap(hmCounts, cmap='viridis', fmt='g', annot=True, linewidths=.5, cbar_kws={'label': 'Number of downtime events'}, yticklabels= yticklabels)
     elif mode == 'summed':
         sns.heatmap(hmDur, cmap='viridis', fmt='g', annot=True,linewidths=.5, cbar_kws={'label': 'Summed downtime (hours)'}, yticklabels= yticklabels, vmax=durCeiling)
+    elif mode == 'percOfPlan':
+        sns.heatmap(hmPercOfPlan, cmap='viridis', fmt='.1f', annot=True,linewidths=.5, cbar_kws={'label': 'Downtime (\% of total  planned delivery)'}, yticklabels= yticklabels)
+    elif mode == 'percOfDown':
+        sns.heatmap(hmPercOfDown, cmap='viridis', fmt='.1f', annot=True,linewidths=.5, cbar_kws={'label': 'Downtime (\% of total downtime)'}, yticklabels= yticklabels)
     plt.ylabel(xName, fontsize=16)
     plt.xlabel(yName, fontsize=16)
     plt.tight_layout()
@@ -94,8 +114,8 @@ def generatePlots():
                 print('Choose machine (R1 or R3 or I), Leave blank to show combined statistics:')
                 machine = input()
             mode = None
-            while mode not in ['counts', 'summed']:
-                print('choose z-axis for heatmaps (counts or summed):')
+            while mode not in ['counts', 'summed', 'percOfPlan', 'percOfDown']:
+                print('choose z-axis for heatmaps (counts or summed or percOfPlan or percOfDown):')
                 mode = input()
             #week number vs event code
             heatmapDowntime(df, 'codeIndex', 'week', 20, 27, durCeiling=300, machine=machine,  yticklabels=codes, mode=mode)
