@@ -69,8 +69,8 @@ def heatmapDowntime(df, xName, yName, xdim, ydim, durCeiling, yticklabels, mode,
             hm[h][d] += row.percOfDown
             Z="\% of total\ndowntime"
 
-    f, axs = plt.subplots(1,1,figsize=(16,10))
-    gs = gridspec.GridSpec(2, 2, width_ratios=[5,1], height_ratios=[1,5])
+    f, axs = plt.subplots(1,1,figsize=(15,10))
+    gs = gridspec.GridSpec(2, 2, width_ratios=[6,1], height_ratios=[1,4])
     gs.update(wspace=0.025, hspace=0.025) # set the spacing between axes. 
     ax = plt.subplot(gs[1,0])
 
@@ -202,6 +202,8 @@ if __name__ == '__main__':
         heatmapDowntime(df, 'codeIndex', 'week', 20, 27, durCeiling=300, machine=machine,  yticklabels=codes, mode=mode, xLab="week", yLab="Downtime code")
         #hour of day vs event code
         heatmapDowntime(df, 'codeIndex', 'hour', 20, 24, durCeiling=300, machine=machine,  yticklabels=codes, mode=mode, xLab="Starting hour", yLab="Downtime code")
+        #code vs dayofweek
+        heatmapDowntime(df, 'codeIndex', 'dayofweek', 20, 7, durCeiling=300, machine=machine,  yticklabels=codes, mode=mode, xLab="day", yLab="Downtime code")
         #downtime start hour vs week day
         heatmapDowntime(df, 'dayofweek', 'hour', 7, 24, durCeiling=300, machine=machine, yticklabels=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], mode=mode, xLab="Starting hour", yLab="Day")
         #Week number vs day of week
